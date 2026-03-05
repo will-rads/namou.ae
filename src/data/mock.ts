@@ -1,9 +1,12 @@
 /* ── Mock data for the baseline UI (v1, no backend) ── */
 
+export type LandCategory = "residential" | "commercial" | "industrial" | "mixed-use";
+
 export interface Plot {
   id: string;
   name: string;
-  area: string; // e.g. "Al Marjan Beach District"
+  area: string;
+  category: LandCategory;
   plotArea: number; // sq ft
   askingPrice: number; // AED
   pricePerSqFt: number; // AED
@@ -18,6 +21,7 @@ export interface Plot {
   zoning?: string;
   infrastructure?: string;
   dimensions?: { width: number; depth: number };
+  developmentPotential?: string;
 }
 
 export interface Landmark {
@@ -42,6 +46,27 @@ export interface ItineraryItem {
   icon: string;
 }
 
+export interface LandCategoryInfo {
+  slug: LandCategory;
+  label: string;
+  description: string;
+  plotCount: number;
+}
+
+export interface ROIInputs {
+  constructionCostPerSqFt: number;
+  salePricePerSqFt: number;
+  netSellableAreaPct: number;
+  targetProfitMarginPct: number;
+}
+
+export interface ROIOutputs {
+  roi: number;
+  totalDevelopmentValue: number;
+  maximumLandPrice: number;
+  gfaPrice: number;
+}
+
 /* ── Areas ── */
 export const areas = [
   "Al Hamra (Freehold Plots)",
@@ -57,6 +82,7 @@ export const plots: Plot[] = [
     id: "plot-1",
     name: "MBD-R-01",
     area: "Al Marjan Beach District",
+    category: "mixed-use",
     plotArea: 660744,
     askingPrice: 73718880,
     pricePerSqFt: 500,
@@ -76,6 +102,7 @@ export const plots: Plot[] = [
     id: "plot-2",
     name: "MBD-R-02",
     area: "Al Marjan Beach District",
+    category: "residential",
     plotArea: 426364,
     askingPrice: 48_000_000,
     pricePerSqFt: 450,
@@ -95,6 +122,7 @@ export const plots: Plot[] = [
     id: "plot-3",
     name: "MBD-H-01",
     area: "Al Marjan Beach District",
+    category: "commercial",
     plotArea: 665174,
     askingPrice: 82_000_000,
     pricePerSqFt: 520,
@@ -114,6 +142,7 @@ export const plots: Plot[] = [
     id: "plot-4",
     name: "MBD-CC-01",
     area: "Al Marjan Beach District",
+    category: "commercial",
     plotArea: 436_017,
     askingPrice: 55_000_000,
     pricePerSqFt: 480,
@@ -133,6 +162,7 @@ export const plots: Plot[] = [
     id: "plot-5",
     name: "MBD-RM-01",
     area: "Al Marjan Beach District",
+    category: "mixed-use",
     plotArea: 518_000,
     askingPrice: 62_000_000,
     pricePerSqFt: 470,
@@ -243,3 +273,60 @@ export function formatNumber(n: number): string {
 export function formatAED(n: number): string {
   return `AED ${n.toLocaleString("en-US")}`;
 }
+
+/* ── Land categories (Jad: bundle by TYPE not area) ── */
+export const landCategories: LandCategoryInfo[] = [
+  {
+    slug: "residential",
+    label: "Residential",
+    description: "High-density and villa residential plots across RAK's prime districts.",
+    plotCount: plots.filter((p) => p.category === "residential").length,
+  },
+  {
+    slug: "commercial",
+    label: "Commercial",
+    description: "Hospitality, convention, and retail-zoned plots with strong ROI potential.",
+    plotCount: plots.filter((p) => p.category === "commercial").length,
+  },
+  {
+    slug: "industrial",
+    label: "Industrial",
+    description: "Logistically connected industrial plots near ports and free zones.",
+    plotCount: 0, // no mock plots yet
+  },
+  {
+    slug: "mixed-use",
+    label: "Mixed-use",
+    description: "Combined residential, retail, and hospitality zoning for versatile development.",
+    plotCount: plots.filter((p) => p.category === "mixed-use").length,
+  },
+];
+
+/* ── ROI calculation helper ── */
+export function calculateROI(inputs: ROIInputs, gfa: number): ROIOutputs {
+  const { constructionCostPerSqFt, salePricePerSqFt, netSellableAreaPct, targetProfitMarginPct } = inputs;
+  const nsa = gfa * (netSellableAreaPct / 100);
+  const totalDevelopmentValue = nsa * salePricePerSqFt;
+  const totalConstructionCost = gfa * constructionCostPerSqFt;
+  const profit = totalDevelopmentValue - totalConstructionCost;
+  const roi = totalConstructionCost > 0 ? (profit / totalConstructionCost) * 100 : 0;
+  const maximumLandPrice = totalDevelopmentValue - totalConstructionCost - totalDevelopmentValue * (targetProfitMarginPct / 100);
+  const gfaPrice = gfa > 0 ? maximumLandPrice / gfa : 0;
+
+  return {
+    roi: Math.round(roi * 100) / 100,
+    totalDevelopmentValue: Math.round(totalDevelopmentValue),
+    maximumLandPrice: Math.round(Math.max(0, maximumLandPrice)),
+    gfaPrice: Math.round(Math.max(0, gfaPrice) * 100) / 100,
+  };
+}
+
+/* ── Example deal defaults (RAK Central, Jad: $800/sqft construction) ── */
+export const exampleDealDefaults: ROIInputs = {
+  constructionCostPerSqFt: 800,
+  salePricePerSqFt: 1500,
+  netSellableAreaPct: 75,
+  targetProfitMarginPct: 20,
+};
+
+export const exampleDealGFA = 2_000_000; // sq ft — RAK Central tower
