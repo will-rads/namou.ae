@@ -1,178 +1,292 @@
-# Jad Requirements — Deck / UI Structure (Implementation Notes)
+# Namou Investment Deck / Screen-Share Tool — Structure & Guidelines
 
-## Goal (what this becomes in code)
-This “deck” should behave less like a brochure and more like an **interactive deal-structuring web app**:
-- **Simple** (minimal UI clutter)
-- **Interactive** (ROI calculated live during the call)
-- **Educational** (teach ROI like a formula)
-- **Transactional** (drive toward submitting an offer)
+> **Source of truth.** When this file conflicts with older prototypes or screenshots, this file wins.
 
----
+## Core purpose
 
-## 1) Landing / Overview
-**Purpose:** introduce the opportunity and orient the client.
+This is not a static deck. It is a **live deal-structuring tool** used by a Namou specialist during a video call.
 
-**Design rules**
-- Remove unnecessary borders and visual clutter
-- No “glass” design element
-- Reduce margin thickness to maximize content space
-- Keep a clean, modern interface similar to the website layout with navigation on the left
-
-**Content**
-- Namu/NEMU land investment overview
-- Brief positioning statement
-- Navigation to land categories
+The experience must:
+- educate the investor
+- let them explore land options clearly
+- calculate land price live during the call
+- drive toward a concrete action, especially submitting an offer
 
 ---
 
-## 2) Master Plan Overview
-**Purpose:** show the full development vision (keep it simple).
+## Design rules and visual tone
 
-**Key changes**
-- Simplify the master plan view
-- Use an interactive map via Mango platform instead of heavy static zoom features
-- Users should be able to zoom/explore themselves
+### 1) Simple
+- Minimal UI clutter
+- Every element must earn its place
+- No decorative borders
+- No glass elements
+- No floating decorative UI artifacts
 
-**Content**
-- Master plan map
-- Highlight major districts
-- Ability to filter by land type
+### 2) Interactive
+- ROI tool must be live and adjustable during the investor call
+- The tool should feel responsive and interactive, not like a static presentation
 
----
+### 3) Educational
+- Guide the investor through the logic step by step before asking for commitment
+- Explain ROI clearly before presenting the result
 
-## 3) Land Categories (bundle by TYPE, not by area)
-**Purpose:** avoid clutter and make navigation + comparison easier.
-
-**Categories**
-- Residential
-- Commercial
-- Industrial
-- Mixed-use
-
-**Notes**
-- This enables easier comparisons, standardized ROI calculations, and simpler navigation.
-- Each category should list available plots within that type.
+### 4) Transactional
+- The experience is designed to produce an offer or another concrete next step
+- It should not just inform the prospect
 
 ---
 
-## 4) Individual Asset Pages (one page per plot)
-**Purpose:** provide clear details for each specific plot.
+## Non-negotiable aesthetic rules
 
-**Key requirement**
-- No pop-up asset specs
-- Clicking an asset opens a dedicated page
+- **Primary color: Emerald Green**
+- No soft colors
+- No mint green
+- No nude tones
+- No pastel accents
+- Content should occupy ~95% of the page — minimize empty margin space
+- Remove all unnecessary borders, glass elements, and floating decorative pieces
+- Sidebar on the left
+- **Sidebar must be collapsible/foldable** so full-screen content can be shown when needed
 
-**Content**
+---
+
+# SECTION 1 — LANDING PAGE
+
+## Purpose
+Introduce the opportunity and orient the client immediately with clarity and no clutter.
+
+## Required structure
+- Left-side navigation layout mirroring the website
+- Sidebar must be collapsible
+- Content fills most of the viewport
+
+## Navigation — five land category buttons
+
+Categories are by **LAND TYPE**, not by geographic area:
+
+1. Residential
+2. Commercial
+3. Industrial
+4. Agriculture
+5. Hospitality
+
+### Homepage behavior
+- Homepage starts by **land type**, not area
+- When a user selects a land type → show all plots in that category as small selectable icons/cards
+- This is the primary entry flow
+
+> **Important:** Land categories must be grouped by type, not by area, to reduce clutter and allow standardized ROI comparison across similar assets.
+
+---
+
+# SECTION 2 — INTERACTIVE MAP VIEW
+
+## Purpose
+Show the full geographic scope of Namou landholdings.
+
+## Map platform
+Use **Mango** as the map reference / intended platform (replaces heavy static zoom behavior).
+
+## Geographic coverage
+The map should support plots across:
+- Sharjah
+- Umm Al Quwain
+- Ras Al Khaimah
+
+## Plot interaction behavior
+After selecting a land category, open the map and show **only plots relevant to that category**.
+
+Each plot on the map must be clickable. When clicked, open a **side popup/panel** attached to the map showing:
+- Plot name
+- Zone type
+- Size
+- Location
+- Photo thumbnails / preview image
+- Simple image carousel access
+- CTA button: **"Go to Land Specs"**
+
+### Land Specs navigation from map
+When "Go to Land Specs" is clicked:
+- Open a **new tab**
+- Go directly to that selected land's specs (not a generic page)
+
+### Filter controls
+The map supports filtering visible plots by the same five land categories:
+- Residential / Commercial / Industrial / Agriculture / Hospitality
+
+---
+
+# SECTION 3 — IN-DEPTH SECTION
+
+> Renamed from "Master Plan" — this is more precise and investor-appropriate.
+
+## Purpose
+Provide complete, structured data for each specific plot on a single page.
+
+### UX rules
+- No pop-ups
+- No redirects
+- No page exits to find key data
+- The user should never have to leave this area to understand the plot
+
+## Split-screen layout
+
+### Right panel — Selection Panel
+- Scrollable list of land plots
+- Each item: thumbnail, name, zone badge
+- Primary focus can begin with hospitality plots
+- Always visible on load
+
+### Left panel — Detail Panel
+Updates instantly when a plot is selected on the right. Must include:
 - Plot overview
+- Payment information
+- Asset specs
+- Image gallery
 - Location map
-- Key metrics
-- Development potential
 
-**Asset specs section**
-Use a clean structured list (not messy blocks), showing:
-- Plot size
-- Max height
+### Navigation rule
+- Selecting a plot updates details instantly — zero page changes, zero pop-ups, no redirects
+
+### One-stop-shop rule
+Everything the investor needs is visible here: payment info, asset specs, location, images, surrounding context. No external links. No click-out behavior.
+
+---
+
+# SECTION 4 — ASSET SPECS
+
+## Data-first rule
+Specs must be **visually dominant** and clearly visible on screen. Not buried in narrative.
+
+## Asset specs fields
+- Plot Size
+- Max Height
 - Floor Area Ratio (FAR)
-- GFA
+- Gross Floor Area (GFA)
 - Zoning
-- Infrastructure access
+- Infrastructure Access
 
-**Important**
-- Avoid “sales narration” of technical details — they should be clearly visible.
-
----
-
-## 5) ROI Explanation (teach it like a formula)
-**Purpose:** teach the investor the logic behind the deal.
-
-**Style**
-- Explain ROI like a specialist teaching a formula step-by-step.
-
-**Slides/sections should explain**
-1) Development assumptions  
-2) Construction cost  
-3) Sellable area  
-4) Sale price assumptions  
-5) Profit margin  
-
-This should flow directly into the interactive calculation tool.
+## Specialist behavior
+The specialist should not have to read every technical spec aloud — the data should be clearly visible.
 
 ---
 
-## 6) Interactive ROI Tool (core feature)
-**Most important section of the entire experience.**
-Instead of static numbers, the specialist changes variables live during the call.
+# SECTION 5 — ROI EXPLANATION + LIVE ROI TOOL
 
-**Adjustable variables**
-- Construction cost per sq ft
-- Expected sale price per sq ft
-- Net sellable area percentage (NSA)
-- Target developer profit margin
+## ROI explanation purpose
+Teach the investor the logic step by step before showing the output:
+1. Development assumptions
+2. Construction cost
+3. Sellable area
+4. Sale price assumptions
+5. Profit margin
 
-**Tool outputs (auto-calculated)**
+This leads directly into the live ROI tool.
+
+## Live ROI tool
+This is a **live deal-structuring tool**, not a static calculator.
+
+### Adjustable variables (inputs)
+- Construction Cost / sq ft
+- Expected Sale Price / sq ft
+- Net Sellable Area % (NSA)
+- Target Developer Profit Margin
+
+> **Important:** Construction cost for high-end towers = **$800 / sq ft**. The previous $220 figure is permanently removed.
+
+### Input UX
+Use **text input fields**, not sliders. The specialist should type assumptions manually.
+
+### Auto-calculated outputs
 - ROI
-- Total development value
-- Maximum land price
-- GFA price
+- Total Development Value
+- Maximum Land Price
+- GFA Price
 
-**Goal**
-Reverse engineer the land price the investor is willing to offer.
+## Goal
+The investor reverse-engineers the land price they are willing to offer based on their own assumptions.
 
----
-
-## 7) Example Deal (RAK Central case)
-Use one real example to demonstrate the ROI tool.
-
-**Key correction**
-- Construction cost should be ~ **$800/sq ft** (high-end tower), not $220/sq ft.
-
-**Purpose**
-- Demonstrate ROI tool operation
-- Show realistic assumptions
+## Example deal
+- Asset: RAK Central
+- Type: High-end commercial tower
+- Construction Cost: $800 / sq ft
 
 ---
 
-## 8) Namu Lands Gallery
-New section to show the plots visually.
+# SECTION 6 — GALLERY
 
-**Content**
-- Land photos
-- Drone shots
-- Area highlights
+## Purpose
+Show the actual plots visually before the final CTA.
 
-**Format**
+## Content
+- Land photos, drone shots, area highlights, surroundings
+- Placeholders acceptable where real assets are missing
+
+## Format
 - Gallery-style layout
+- Minimal text
+- Premium visual presentation
+- Not cluttered
 
 ---
 
-## 9) Call-to-Action (strong action tools)
-Deck/UI should lead to immediate next steps:
-- Schedule a site visit
-- Book another call
-- Schedule a video meeting
-- Submit an offer
+# SECTION 7 — FINAL ACTION / CTA
 
-**Submit Offer feature must**
-- Generate a deal link
-- Allow client to sign and secure the opportunity
+## Purpose
+Drive immediate next steps. This experience is **transactional**.
+
+## CTA options (six total)
+1. Schedule a Site Visit
+2. Follow-up Call
+3. Schedule Video Meeting
+4. Request Detailed Report
+5. Meet The Master Plan Developer
+6. **Submit an Offer** ← primary CTA, visually distinguished
+
+## Final offer calculation
+Immediately above Submit Offer, display:
+
+> "Based on your assumptions, your land offer would be:"
+
+Show: GFA Price · Total Land Value · ROI — values pulled directly from the ROI tool.
+
+## Offer behavior
+- Offer amount starts from ROI-calculated maximum land price
+- Remains editable by the specialist before submission
+
+## Action modal behavior
+When any action is selected (Submit Offer, Schedule Visit, etc.):
+- Open a **popup/modal**
+- Collect: name, date, time, notes
+
+## Submission handling (for now)
+No backend integrations yet. Structure as if data goes to a sheet or manual follow-up. CRM / Zoho integration is future scope.
 
 ---
 
-## 10) Final Offer Calculation (closing)
-End with:
-“Based on your assumptions, your land offer would be:”
+# Product / UX direction
 
-Display:
-- Calculated GFA price
-- Total land value
-- ROI
+This should feel like:
+- A premium sales tool
+- A screen-share-first product
+- Elegant, practical, interactive
+- Easy for a specialist to explain live
 
-Then move directly to **Submit Offer**.
+This should NOT feel like:
+- A static deck or brochure
+- A decorative concept UI
+- A cluttered dashboard
 
----
+## Corrected user flow
 
-## Implementation Translation (how this maps to the app)
-- Left nav with sections: Overview → Master Plan → Categories → Asset → ROI Explain → ROI Tool → Example → Gallery → CTA → Final Offer
-- Asset click routes to a dedicated page (no modal spec popups)
-- ROI tool is interactive, stateful, and updates derived values instantly
-- Keep UI minimal, clean, and consistent
+```
+Land Type → Category Plots → Filtered Map → Selected Plot Popup → Land Specs + ROI → Final Action
+```
+
+## Additional guidance
+- Old Adobe XD screenshots are reference only, not the design ceiling
+- This spec takes priority when there is a conflict
+- Placeholders acceptable for missing media
+- Specialist-led, one-on-one screen-share is the primary scenario
+- Optimize for clarity, speed, and transparent explanation during the call
