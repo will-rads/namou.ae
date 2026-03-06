@@ -3,21 +3,27 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-/* Jad's nav: Overview → Master Plan → Categories → Asset → ROI Explain → ROI Tool → Example → Gallery → CTA → Final Offer */
-const navItems = [
-  { href: "/overview", label: "Overview", icon: HomeIcon },
-  { href: "/master-plan", label: "Master Plan", icon: PlanIcon },
-  { href: "/categories", label: "Categories", icon: GridIcon },
-  { href: "/roi", label: "ROI Explain", icon: TrendIcon },
-  { href: "/roi/calculator", label: "ROI Tool", icon: CalcIcon },
-  { href: "/roi/example", label: "Example Deal", icon: BarIcon },
-  { href: "/gallery", label: "Gallery", icon: GalleryIcon },
-  { href: "/cta", label: "Next Steps", icon: RocketIcon },
-  { href: "/offer", label: "Final Offer", icon: CheckIcon },
+/* 6-step guided call flow */
+const navSteps = [
+  { step: 1, href: "/rak-landscape", label: "Landscape", icon: MapIcon },
+  { step: 2, href: "/master-plan", label: "Explore", icon: PlanIcon },
+  { step: 3, href: "/asset-specs", label: "Plot Details", icon: SpecsIcon },
+  { step: 4, href: "/roi/calculator", label: "Returns", icon: TrendIcon },
+  { step: 5, href: "/gallery", label: "Gallery", icon: GalleryIcon },
+  { step: 6, href: "/next-steps", label: "Next Steps", icon: CheckIcon },
 ];
+
+/* Match route → step index (0-based) */
+function getActiveStepIndex(pathname: string): number {
+  // ROI sub-routes (explain, example) also map to step 4
+  if (pathname.startsWith("/roi")) return 3;
+  const idx = navSteps.findIndex((s) => pathname.startsWith(s.href));
+  return idx >= 0 ? idx : -1;
+}
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const activeIdx = getActiveStepIndex(pathname);
 
   return (
     <aside className="flex flex-col w-[200px] min-h-screen bg-forest text-white py-8 px-5 shrink-0">
@@ -28,40 +34,71 @@ export default function Sidebar() {
         </span>
       </Link>
 
-      {/* Nav */}
-      <nav className="flex flex-col gap-1">
-        {navItems.map((item) => {
-          const active =
-            item.href === "/roi"
-              ? pathname === "/roi"
-              : pathname.startsWith(item.href);
+      {/* Nav steps */}
+      <nav className="flex flex-col gap-0.5">
+        {navSteps.map((item, idx) => {
+          const isActive = idx === activeIdx;
+          const isVisited = idx < activeIdx;
+
           return (
             <Link
               key={item.href}
               href={item.href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                active
+                isActive
                   ? "bg-white/15 text-white font-medium"
-                  : "text-white/70 hover:bg-white/10 hover:text-white"
+                  : "text-white/60 hover:bg-white/10 hover:text-white"
               }`}
             >
-              <item.icon className="w-4 h-4 shrink-0" />
+              {/* Step indicator: number or checkmark */}
+              <span
+                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                  isActive
+                    ? "bg-mint text-forest"
+                    : isVisited
+                      ? "bg-white/25 text-white"
+                      : "bg-white/10 text-white/50"
+                }`}
+              >
+                {isVisited ? (
+                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                ) : (
+                  item.step
+                )}
+              </span>
+
+              <item.icon className="w-4 h-4 shrink-0 opacity-70" />
               {item.label}
             </Link>
           );
         })}
       </nav>
+
+      {/* Spacer + change area link */}
+      <div className="mt-auto pt-6 border-t border-white/10">
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-xs text-white/50 hover:text-white/80 transition-colors px-3 py-2"
+        >
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Change area
+        </Link>
+      </div>
     </aside>
   );
 }
 
 /* ── Inline SVG icons ── */
 
-function HomeIcon({ className }: { className?: string }) {
+function MapIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-      <polyline points="9 22 9 12 15 12 15 22" />
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+      <circle cx="12" cy="10" r="3" />
     </svg>
   );
 }
@@ -76,11 +113,13 @@ function PlanIcon({ className }: { className?: string }) {
   );
 }
 
-function GridIcon({ className }: { className?: string }) {
+function SpecsIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
-      <rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
     </svg>
   );
 }
@@ -94,43 +133,12 @@ function TrendIcon({ className }: { className?: string }) {
   );
 }
 
-function CalcIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="4" y="2" width="16" height="20" rx="2" />
-      <line x1="8" y1="6" x2="16" y2="6" />
-      <line x1="8" y1="10" x2="8" y2="10.01" /><line x1="12" y1="10" x2="12" y2="10.01" /><line x1="16" y1="10" x2="16" y2="10.01" />
-      <line x1="8" y1="14" x2="8" y2="14.01" /><line x1="12" y1="14" x2="12" y2="14.01" /><line x1="16" y1="14" x2="16" y2="14.01" />
-      <line x1="8" y1="18" x2="8" y2="18.01" /><line x1="12" y1="18" x2="16" y2="18" />
-    </svg>
-  );
-}
-
-function BarIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
-    </svg>
-  );
-}
-
 function GalleryIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="3" width="18" height="18" rx="2" />
       <circle cx="8.5" cy="8.5" r="1.5" />
       <polyline points="21 15 16 10 5 21" />
-    </svg>
-  );
-}
-
-function RocketIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z" />
-      <path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z" />
-      <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
-      <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
     </svg>
   );
 }

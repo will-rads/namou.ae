@@ -1,26 +1,22 @@
 "use client";
 
-import { useState, useMemo } from "react";
 import ContentCard from "@/components/ContentCard";
-import { plots, calculateROI, formatNumber, type ROIInputs } from "@/data/mock";
+import { useArea } from "@/context/AreaContext";
+import { formatNumber } from "@/data/mock";
 
 export default function ROICalculatorPage() {
-  const [selectedPlotId, setSelectedPlotId] = useState(plots[0].id);
-  const [inputs, setInputs] = useState<ROIInputs>({
-    constructionCostPerSqFt: 800,
-    salePricePerSqFt: 1500,
-    netSellableAreaPct: 75,
-    targetProfitMarginPct: 20,
-  });
+  const {
+    areaPlots,
+    selectedPlotId,
+    setSelectedPlotId,
+    selectedPlot,
+    roiInputs,
+    updateROIInput,
+    roiOutputs,
+    roiGfa,
+  } = useArea();
 
-  const selectedPlot = plots.find((p) => p.id === selectedPlotId) || plots[0];
-  const gfa = selectedPlot.gfa || selectedPlot.plotArea * (selectedPlot.far || 3);
-
-  const outputs = useMemo(() => calculateROI(inputs, gfa), [inputs, gfa]);
-
-  const updateInput = (key: keyof ROIInputs, value: number) => {
-    setInputs((prev) => ({ ...prev, [key]: value }));
-  };
+  const needsPlot = !selectedPlot;
 
   return (
     <div>
@@ -38,7 +34,7 @@ export default function ROICalculatorPage() {
           <ContentCard>
             <h2 className="text-sm font-semibold text-deep-forest mb-3">Select Plot</h2>
             <div className="flex gap-2 flex-wrap">
-              {plots.map((p) => (
+              {areaPlots.map((p) => (
                 <button
                   key={p.id}
                   onClick={() => setSelectedPlotId(p.id)}
@@ -52,73 +48,87 @@ export default function ROICalculatorPage() {
                 </button>
               ))}
             </div>
-            <p className="text-xs text-muted mt-2">
-              GFA: {formatNumber(Math.round(gfa))} sq ft | Asking: AED {formatNumber(selectedPlot.askingPrice)}
-            </p>
+            {selectedPlot && (
+              <p className="text-xs text-muted mt-2">
+                GFA: {formatNumber(Math.round(roiGfa))} sq ft | Asking: AED {formatNumber(selectedPlot.askingPrice)}
+              </p>
+            )}
           </ContentCard>
 
-          {/* Sliders */}
-          <ContentCard>
-            <h2 className="text-sm font-semibold text-deep-forest mb-4">Adjustable Variables</h2>
-            <div className="space-y-5">
-              <SliderInput
-                label="Construction Cost per sq ft"
-                value={inputs.constructionCostPerSqFt}
-                min={200}
-                max={1500}
-                step={10}
-                unit="$"
-                onChange={(v) => updateInput("constructionCostPerSqFt", v)}
-              />
-              <SliderInput
-                label="Expected Sale Price per sq ft"
-                value={inputs.salePricePerSqFt}
-                min={500}
-                max={3000}
-                step={10}
-                unit="$"
-                onChange={(v) => updateInput("salePricePerSqFt", v)}
-              />
-              <SliderInput
-                label="Net Sellable Area (NSA)"
-                value={inputs.netSellableAreaPct}
-                min={50}
-                max={90}
-                step={1}
-                unit="%"
-                onChange={(v) => updateInput("netSellableAreaPct", v)}
-              />
-              <SliderInput
-                label="Target Developer Profit Margin"
-                value={inputs.targetProfitMarginPct}
-                min={5}
-                max={40}
-                step={1}
-                unit="%"
-                onChange={(v) => updateInput("targetProfitMarginPct", v)}
-              />
-            </div>
-          </ContentCard>
+          {/* Sliders — only show when a plot is selected */}
+          {needsPlot ? (
+            <ContentCard>
+              <p className="text-sm text-muted py-4 text-center">Select a plot above to start modeling.</p>
+            </ContentCard>
+          ) : (
+            <ContentCard>
+              <h2 className="text-sm font-semibold text-deep-forest mb-4">Adjustable Variables</h2>
+              <div className="space-y-5">
+                <SliderInput
+                  label="Construction Cost per sq ft"
+                  value={roiInputs.constructionCostPerSqFt}
+                  min={200}
+                  max={1500}
+                  step={10}
+                  unit="$"
+                  onChange={(v) => updateROIInput("constructionCostPerSqFt", v)}
+                />
+                <SliderInput
+                  label="Expected Sale Price per sq ft"
+                  value={roiInputs.salePricePerSqFt}
+                  min={500}
+                  max={3000}
+                  step={10}
+                  unit="$"
+                  onChange={(v) => updateROIInput("salePricePerSqFt", v)}
+                />
+                <SliderInput
+                  label="Net Sellable Area (NSA)"
+                  value={roiInputs.netSellableAreaPct}
+                  min={50}
+                  max={90}
+                  step={1}
+                  unit="%"
+                  onChange={(v) => updateROIInput("netSellableAreaPct", v)}
+                />
+                <SliderInput
+                  label="Target Developer Profit Margin"
+                  value={roiInputs.targetProfitMarginPct}
+                  min={5}
+                  max={40}
+                  step={1}
+                  unit="%"
+                  onChange={(v) => updateROIInput("targetProfitMarginPct", v)}
+                />
+              </div>
+            </ContentCard>
+          )}
         </div>
 
         {/* Outputs column */}
         <div className="space-y-4">
           <ContentCard className="bg-forest text-white border-forest">
             <h2 className="text-sm font-medium opacity-80 mb-4">Calculated Results</h2>
-            <div className="space-y-4">
-              <OutputMetric label="ROI" value={`${outputs.roi}%`} />
-              <OutputMetric label="Total Development Value" value={`$${formatNumber(outputs.totalDevelopmentValue)}`} />
-              <OutputMetric label="Maximum Land Price" value={`$${formatNumber(outputs.maximumLandPrice)}`} highlight />
-              <OutputMetric label="GFA Price" value={`$${outputs.gfaPrice.toFixed(2)}/sq ft`} />
-            </div>
+            {needsPlot ? (
+              <p className="text-sm opacity-60 py-4">Select a plot to see results.</p>
+            ) : (
+              <div className="space-y-4">
+                <OutputMetric label="ROI" value={`${roiOutputs.roi}%`} />
+                <OutputMetric label="Total Development Value" value={`$${formatNumber(roiOutputs.totalDevelopmentValue)}`} />
+                <OutputMetric label="Maximum Land Price" value={`$${formatNumber(roiOutputs.maximumLandPrice)}`} highlight />
+                <OutputMetric label="GFA Price" value={`$${roiOutputs.gfaPrice.toFixed(2)}/sq ft`} />
+              </div>
+            )}
           </ContentCard>
 
-          <a
-            href="/offer"
-            className="block w-full text-center px-6 py-3 bg-mint text-forest rounded-xl font-semibold text-sm hover:bg-mint-light transition-colors"
-          >
-            Proceed to Final Offer
-          </a>
+          {!needsPlot && (
+            <a
+              href="/next-steps"
+              className="block w-full text-center px-6 py-3 bg-mint text-forest rounded-xl font-semibold text-sm hover:bg-mint-light transition-colors"
+            >
+              Proceed to Final Offer
+            </a>
+          )}
         </div>
       </div>
     </div>
